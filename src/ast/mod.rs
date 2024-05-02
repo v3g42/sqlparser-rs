@@ -682,6 +682,7 @@ pub enum Expr {
     },
     /// Scalar function call e.g. `LEFT(foo, 5)`
     Function(Function),
+    TableFunction(TableFunction),
     /// Aggregate function with filter
     AggregateExpressionWithFilter {
         expr: Box<Expr>,
@@ -1052,6 +1053,7 @@ impl fmt::Display for Expr {
                 write!(f, " '{}'", &value::escape_single_quote_string(value))
             }
             Expr::Function(fun) => write!(f, "{fun}"),
+            Expr::TableFunction(fun) => write!(f, "{fun}"),
             Expr::AggregateExpressionWithFilter { expr, filter } => {
                 write!(f, "{expr} FILTER (WHERE {filter})")
             }
@@ -4779,6 +4781,15 @@ impl fmt::Display for CloseCursor {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "visitor", derive(Visit, VisitMut))]
+pub struct TableFunction {
+    pub name: ObjectName,
+    pub args: Vec<FunctionArg>,
+    pub inner_args: Vec<FunctionArg>,
+}
+
 /// A function call
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
@@ -4818,7 +4829,18 @@ impl fmt::Display for AnalyzeFormat {
         })
     }
 }
-
+impl fmt::Display for TableFunction {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}({})({})",
+            self.name,
+            display_comma_separated(&self.args),
+            display_comma_separated(&self.inner_args),
+        )?;
+        Ok(())
+    }
+}
 impl fmt::Display for Function {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.special {

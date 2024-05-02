@@ -1230,6 +1230,16 @@ impl<'a> Parser<'a> {
         self.expect_token(&Token::LParen)?;
         let distinct = self.parse_all_or_distinct()?.is_some();
         let (args, order_by) = self.parse_optional_args_with_orderby()?;
+
+        // Table function passing two paranthesis especially for clickhouse
+        if self.consume_token(&Token::LParen) {
+            let (inner_args, _) = self.parse_optional_args_with_orderby()?;
+            return Ok(Expr::TableFunction(TableFunction {
+                name,
+                args,
+                inner_args,
+            }));
+        }
         let filter = if self.dialect.supports_filter_during_aggregation()
             && self.parse_keyword(Keyword::FILTER)
             && self.consume_token(&Token::LParen)
