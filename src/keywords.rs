@@ -700,6 +700,7 @@ define_keywords!(
     TIMEZONE_REGION,
     TINYINT,
     TO,
+    TOOL,
     TOP,
     TRAILING,
     TRANSACTION,
