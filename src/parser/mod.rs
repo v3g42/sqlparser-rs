@@ -6580,6 +6580,7 @@ impl<'a> Parser<'a> {
                     } else if self.consume_token(&Token::LParen) {
                         let (inside_type, _trailing_bracket) = self.parse_data_type_helper()?;
                         self.expect_token(&Token::RParen)?;
+
                         Ok(DataType::Array(ArrayElemTypeDef::Parenthesis(Box::new(
                             inside_type,
                         ))))
