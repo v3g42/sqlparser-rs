@@ -6577,6 +6577,12 @@ impl<'a> Parser<'a> {
                 Keyword::ARRAY => {
                     if dialect_of!(self is SnowflakeDialect) {
                         Ok(DataType::Array(ArrayElemTypeDef::None))
+                    } else if self.consume_token(&Token::LBracket) {
+                        let (inside_type, _trailing_bracket) = self.parse_data_type_helper()?;
+                        trailing_bracket = self.expect_closing_angle_bracket(_trailing_bracket)?;
+                        Ok(DataType::Array(ArrayElemTypeDef::Parenthesis(Box::new(
+                            inside_type,
+                        ))))
                     } else {
                         self.expect_token(&Token::Lt)?;
                         let (inside_type, _trailing_bracket) = self.parse_data_type_helper()?;
