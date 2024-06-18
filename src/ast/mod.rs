@@ -2649,6 +2649,7 @@ pub enum Statement {
         to: Ident,
         with: Vec<SqlOption>,
     },
+    CreateUser { name: ObjectName, if_not_exists: bool, password: String },
 }
 
 impl fmt::Display for Statement {
@@ -4290,6 +4291,18 @@ impl fmt::Display for Statement {
                 if !with.is_empty() {
                     write!(f, " WITH ({})", display_comma_separated(with))?;
                 }
+
+                Ok(())
+            }
+            Statement::CreateUser { if_not_exists, name, password } => {
+                write!(f, "CREATE USER")?;
+
+                if *if_not_exists {
+                    write!(f, " IF NOT EXISTS")?;
+                }
+
+                write!(f, " {}", name.to_string())?;
+                write!(f, " IDENTIFIED WITH {}", password)?;
 
                 Ok(())
             }

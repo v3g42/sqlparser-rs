@@ -341,6 +341,7 @@ define_keywords!(
     HOSTS,
     HOUR,
     HOURS,
+    IDENTIFIED,
     IDENTITY,
     IF,
     IGNORE,
