@@ -267,6 +267,11 @@ fn parse_select_star_except() {
 }
 
 #[test]
+fn parse_create_user() {
+    clickhouse().verified_stmt("CREATE USER test_user IDENTIFIED WITH NO_PASSWORD");
+}
+
+#[test]
 fn parse_select_star_except_no_parens() {
     clickhouse().one_statement_parses_to(
         "SELECT * EXCEPT prev_status FROM anomalies",

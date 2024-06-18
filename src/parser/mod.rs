@@ -3231,6 +3231,8 @@ impl<'a> Parser<'a> {
             self.parse_create_type()
         } else if self.parse_keyword(Keyword::PROCEDURE) {
             self.parse_create_procedure(or_alter)
+        } else if self.parse_keyword(Keyword::USER) {
+            self.parse_create_user()
         } else {
             self.expected("an object type after CREATE", self.peek_token())
         }
@@ -10151,6 +10153,17 @@ impl<'a> Parser<'a> {
         })
     }
 
+    pub fn parse_create_user(&mut self) -> Result<Statement, ParserError> {
+        let if_not_exists = self.parse_keywords(&[Keyword::IF, Keyword::NOT, Keyword::EXISTS]);
+        let name = self.parse_object_name(false)?;
+        let password = if self.parse_keyword(Keyword::IDENTIFIED) {
+            self.expect_keyword(Keyword::WITH)?;
+            self.parse_literal_string()?
+        } else {
+            "".to_string()
+        };
+        Ok(Statement::CreateUser { name, if_not_exists, password })
+    }
     pub fn parse_window_spec(&mut self) -> Result<WindowSpec, ParserError> {
         let window_name = match self.peek_token().token {
             Token::Word(word) if word.keyword == Keyword::NoKeyword => self.parse_optional_indent(),
